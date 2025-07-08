@@ -9,6 +9,24 @@ export interface Property {
   imageUrl: string;
 }
 
+export interface Unit {
+  id: string;
+  propertyId: string;
+  unitNumber: string;
+  bedrooms: number;
+  bathrooms: number;
+  squareFeet: number;
+  monthlyRent: number;
+  status: 'available' | 'occupied' | 'maintenance';
+  tenantId?: string;
+  tenantName?: string;
+  leaseStart?: string;
+  leaseEnd?: string;
+  amenities: string[];
+  description: string;
+  images: string[];
+}
+
 export interface Payment {
   id: string;
   tenantName: string;
