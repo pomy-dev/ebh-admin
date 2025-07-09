@@ -27,6 +27,80 @@ export interface Unit {
   images: string[];
 }
 
+export interface RentalApplication {
+  id: string;
+  propertyId: string;
+  propertyName: string;
+  unitId?: string;
+  unitNumber?: string;
+  status: 'pending' | 'approved' | 'rejected' | 'under-review';
+  priority: 'high' | 'medium' | 'low';
+  submittedDate: string;
+
+  // Applicant Information
+  applicant: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    dateOfBirth: string;
+    ssn: string; // Last 4 digits only for security
+    emergencyContact: {
+      name: string;
+      phone: string;
+      relationship: string;
+    };
+  };
+
+  // Employment Information
+  employment: {
+    employer: string;
+    position: string;
+    monthlyIncome: number;
+    supervisorContact: string;
+  };
+
+  // References
+  references: {
+    name: string;
+    relationship: string;
+    contact: string;
+  }[];
+
+  // Additional Information
+  additional: {
+    pets: {
+      hasPets: boolean;
+      petDetails?: string;
+    };
+    moveInDate: string;
+    additionalOccupants: {
+      name: string;
+      relationship: string;
+      age: number;
+    }[];
+    specialRequests?: string;
+  };
+
+  // Documents
+  documents: {
+    id: string;
+    name: string;
+    type: string;
+    url: string;
+    uploadedAt: string;
+  }[];
+
+  // Review Information
+  review?: {
+    reviewedBy: string;
+    reviewedAt: string;
+    decision: 'approved' | 'rejected';
+    notes: string;
+    conditions?: string[];
+  };
+}
+
 export interface Payment {
   id: string;
   tenantName: string;

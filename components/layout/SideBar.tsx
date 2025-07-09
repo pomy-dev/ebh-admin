@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, CreditCard, AlertTriangle, Building2, Users } from 'lucide-react';
+import { Home, CreditCard, AlertTriangle, Building2, Users, FileText } from 'lucide-react';
 import logo from '../../assets/images/logo.png';
 
 const Sidebar = () => {
@@ -11,6 +11,7 @@ const Sidebar = () => {
 
   const navItems = [
     { path: '/', icon: Home, label: 'Dashboard' },
+    { path: '/applications', icon: FileText, label: 'Apt Requests' },
     { path: '/payments', icon: CreditCard, label: 'Payments' },
     { path: '/fault', icon: AlertTriangle, label: 'Queries' },
     { path: '/properties', icon: Building2, label: 'Properties' },
