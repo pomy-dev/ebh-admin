@@ -2,39 +2,37 @@ import { Property, Payment, Fault, Tenant } from '@/types';
 import { RentalApplication } from '@/types';
 
 export const properties: Property[] = [
-  {
-    id: '1',
-    name: 'Sunset Apartments',
-    address: '123 Sunset Blvd, Los Angeles, CA 90028',
-    units: 50,
-    occupied: 45,
-    available: 5,
-    monthlyRent: 2500,
-    imageUrl: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg'
-  },
-  {
-    id: '2',
-    name: 'Ocean View Complex',
-    address: '456 Beach Road, Miami, FL 33139',
-    units: 75,
-    occupied: 70,
-    available: 5,
-    monthlyRent: 3000,
-    imageUrl: 'https://images.pexels.com/photos/1838640/pexels-photo-1838640.jpeg'
-  },
-  {
-    id: '3',
-    name: 'City Heights',
-    address: '789 Downtown Ave, New York, NY 10001',
-    units: 100,
-    occupied: 92,
-    available: 8,
-    monthlyRent: 3500,
-    imageUrl: 'https://images.pexels.com/photos/2462015/pexels-photo-2462015.jpeg'
-  }
+  // {
+  //   id: '1',
+  //   name: 'Sunset Apartments',
+  //   address: '123 Sunset Blvd, Los Angeles, CA 90028',
+  //   units: 50,
+  //   occupied: 45,
+  //   available: 5,
+  //   monthlyRent: 2500,
+  //   imageUrl: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg'
+  // },
+  // {
+  //   id: '2',
+  //   name: 'Ocean View Complex',
+  //   address: '456 Beach Road, Miami, FL 33139',
+  //   units: 75,
+  //   occupied: 70,
+  //   available: 5,
+  //   monthlyRent: 3000,
+  //   imageUrl: 'https://images.pexels.com/photos/1838640/pexels-photo-1838640.jpeg'
+  // },
+  // {
+  //   id: '3',
+  //   name: 'City Heights',
+  //   address: '789 Downtown Ave, New York, NY 10001',
+  //   units: 100,
+  //   occupied: 92,
+  //   available: 8,
+  //   monthlyRent: 3500,
+  //   imageUrl: 'https://images.pexels.com/photos/2462015/pexels-photo-2462015.jpeg'
+  // }
 ];
-
-  
 
 export const payments: Payment[] = [
   {

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Home, Bed, Bath, Maximize, DollarSign, Plus, Edit, Eye, User, Calendar } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Home, Bed, Bath, Maximize, Plus, Edit, User, Calendar } from 'lucide-react';
 import { Unit, Property } from '@/types';
 import UnitForm from './UnitForm';
 
@@ -22,9 +22,14 @@ const UnitsModal: React.FC<UnitsModalProps> = ({
   onAddUnit,
   onEditUnit
 }) => {
+
   const [isUnitFormOpen, setIsUnitFormOpen] = useState(false);
   const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  useEffect(() => {
+
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -262,7 +267,7 @@ const UnitsModal: React.FC<UnitsModalProps> = ({
 
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-600">Monthly Rent</span>
-                        <span className="font-semibold text-gray-800">${unit.monthlyRent.toLocaleString()}</span>
+                        <span className="font-semibold text-gray-800">${unit.monthlyRent}</span>
                       </div>
 
                       {unit.tenantName && (

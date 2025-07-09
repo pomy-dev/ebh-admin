@@ -10,7 +10,6 @@ interface PropertyFormData {
   city: string;
   state: string;
   zipCode: string;
-  units: number;
   monthlyRent: number;
   propertyType: string;
   description: string;
@@ -32,7 +31,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
     city: property?.address?.split(',')[1]?.trim() || '',
     state: property?.address?.split(',')[2]?.trim()?.split(' ')[0] || '',
     zipCode: property?.address?.split(',')[2]?.trim()?.split(' ')[1] || '',
-    units: property?.units || 1,
     monthlyRent: property?.monthlyRent || 0,
     propertyType: 'apartment',
     description: '',
@@ -67,7 +65,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
         city: addressParts[1]?.trim() || '',
         state: stateZip[0] || '',
         zipCode: stateZip[1] || '',
-        units: property.units,
         monthlyRent: property.monthlyRent,
         propertyType: 'apartment',
         description: '',
@@ -81,7 +78,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
         city: '',
         state: '',
         zipCode: '',
-        units: 1,
         monthlyRent: 0,
         propertyType: 'apartment',
         description: '',
@@ -122,10 +118,8 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
 
     if (!formData.name.trim()) newErrors.name = 'Property name is required';
     if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (typeof formData.units !== 'number' || isNaN(formData.units) || formData.units < 1) newErrors.units = 'Must have at least 1 unit';
     if (!formData.state.trim()) newErrors.state = 'State is required';
     if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
-    if (formData.units < 1) newErrors.units = 'Must have at least 1 unit';
     if (formData.monthlyRent <= 0) newErrors.monthlyRent = 'Monthly rent must be greater than 0';
     if (!formData.description.trim()) newErrors.description = 'Description is required';
 
@@ -308,22 +302,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Number of Units *
-                </label>
-                <input
-                  type="number"
-                  name="units"
-                  value={formData.units}
-                  onChange={handleInputChange}
-                  min="1"
-                  className={`w-full px-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.units ? 'border-red-500' : 'border-gray-300'
-                    }`}
-                  placeholder="50"
-                />
-                {errors.units && <p className="text-red-500 text-sm mt-1">{errors.units}</p>}
-              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

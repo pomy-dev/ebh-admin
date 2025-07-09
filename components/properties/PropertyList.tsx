@@ -1,21 +1,31 @@
 import React from 'react';
 import Image from 'next/image';
-import { Eye, Edit } from 'lucide-react';
+import { Eye, Edit, ArchiveX } from 'lucide-react';
 import { Property } from '@/types';
 
 interface PropertyListProps {
   properties: Property[];
   onViewUnits: (property: Property) => void;
   onEditProperty: (property: Property) => void;
+  onDeleteProperty: (property: Property) => void;
 }
 
-const PropertyList: React.FC<PropertyListProps> = ({ properties, onViewUnits, onEditProperty }) => {
+const PropertyList: React.FC<PropertyListProps> = ({ properties, onViewUnits, onEditProperty, onDeleteProperty }) => {
+
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {properties.map((property) => (
         <div key={property.id} className="bg-white rounded-xl shadow-sm overflow-hidden">
           {/* Property Header with Edit Button */}
-          <div className="relative">
+          <div className="relative flex items-center justify-between">
+            <button
+              onClick={() => onDeleteProperty(property)}
+              className="absolute top-3 right-12 p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-lg shadow-sm transition-all z-10"
+              title="Delete property"
+            >
+              <ArchiveX className="w-4 h-4 text-red-600 hover:text-red-400" />
+            </button>
             <button
               onClick={() => onEditProperty(property)}
               className="absolute top-3 right-3 p-2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-lg shadow-sm transition-all z-10"
