@@ -6,64 +6,17 @@ import PropertyForm from '@/components/properties/PropertyForm';
 import UnitsModal from '@/components/properties/UnitsModal';
 import { properties as initialProperties } from '@/utils/mockData';
 import { Property, Unit } from '@/types';
+import { insertUnit } from '@/services/supabaseService';
 import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId } from '@/services/supabaseService';
 
 const Properties = () => {
   const [properties, setProperties] = useState(initialProperties);
-  const [units, setUnits] = useState<Unit[]>([
-    //   // Sample units for demonstration
-    //   {
-    //     id: '1',
-    //     propertyId: '1',
-    //     unitNumber: '12B',
-    //     bedrooms: 2,
-    //     bathrooms: 2,
-    //     squareFeet: 1200,
-    //     monthlyRent: 2500,
-    //     status: 'occupied',
-    //     tenantId: '1',
-    //     tenantName: 'John Doe',
-    //     leaseStart: '2023-06-01',
-    //     leaseEnd: '2024-05-31',
-    //     amenities: ['Balcony/Patio', 'Hardwood Floors', 'Dishwasher'],
-    //     description: 'Beautiful 2-bedroom unit with hardwood floors and private balcony.',
-    //     images: ['https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg']
-    //   },
-    //   {
-    //     id: '2',
-    //     propertyId: '1',
-    //     unitNumber: '8A',
-    //     bedrooms: 1,
-    //     bathrooms: 1,
-    //     squareFeet: 800,
-    //     monthlyRent: 2200,
-    //     status: 'available',
-    //     amenities: ['Walk-in Closet', 'Central Air', 'Updated Kitchen'],
-    //     description: 'Cozy 1-bedroom unit with modern amenities and great natural light.',
-    //     images: ['https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg']
-    //   },
-    //   {
-    //     id: '3',
-    //     propertyId: '2',
-    //     unitNumber: '45A',
-    //     bedrooms: 3,
-    //     bathrooms: 2.5,
-    //     squareFeet: 1500,
-    //     monthlyRent: 3200,
-    //     status: 'occupied',
-    //     tenantId: '2',
-    //     tenantName: 'Jane Smith',
-    //     leaseStart: '2023-08-15',
-    //     leaseEnd: '2024-08-14',
-    //     amenities: ['Bay Windows', 'Fireplace', 'Granite Countertops'],
-    //     description: 'Spacious 3-bedroom unit with ocean views and premium finishes.',
-    //     images: ['https://images.pexels.com/photos/1571453/pexels-photo-1571453.jpeg']
-    //   }
-  ]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isUnitsModalOpen, setIsUnitsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [editingProperty, setEditingProperty] = useState<Property | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     fetchProperties();
@@ -91,6 +44,8 @@ const Properties = () => {
       units: newProperty.number_of_units,
       occupied: 0,
       available: 0,
+      amenities: newProperty.amenities || [],
+      description: newProperty.description || '',
       monthlyRent: newProperty.monthly_rent,
       imageUrl: newProperty.property_image || 'https://www.pngkey.com/png/detail/266-2665301_jpg-freeuse-library-apartment-for-rent-clipart-house.png'
     }
@@ -105,14 +60,13 @@ const Properties = () => {
         ...editingProperty,
         name: formData.name,
         address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
-        units: formData.units,
         monthlyRent: formData.monthlyRent,
         imageUrl: formData.imageUrl || editingProperty.imageUrl
       };
 
-      // setProperties(prev => prev.map(property =>
-      //   property.id === editingProperty.id ? updatedProperty : property
-      // ));
+      setProperties(prev => prev.map(property =>
+        property.id === editingProperty.id ? updatedProperty : property
+      ));
     }
   };
 
@@ -142,8 +96,8 @@ const Properties = () => {
 
   const handleViewUnits = async (property: Property) => {
     setSelectedProperty(property);
+    setIsLoading(true);
 
-    console.log('======Getting Units=======');
     if (property) {
       const fetchedUnits = await getUnitsByPropertyId(property.id);
       if (Array.isArray(fetchedUnits)) {
@@ -153,16 +107,16 @@ const Properties = () => {
           propertyId: unit.property_id,
           unitNumber: unit.unit,
           bedrooms: unit.numberOfbedRooms,
-          bathrooms: unit.numberBath,
+          bathrooms: unit.numberOfBath,
           squareFeet: unit.squareFeet,
-          monthlyRent: unit.monthlyRent,
+          monthlyRent: unit.properties.monthly_rent,
           status: unit.status,
           tenantId: unit.tenant_id || null,
           tenantName: unit.name || null,
           leaseStart: unit.lease_start_date || null,
           leaseEnd: unit.lease_end_date || null,
-          amenities: unit.amenities || [],
-          description: unit.description || '',
+          amenities: unit.properties.amenities || [],
+          description: unit.properties.description || '',
           images: unit.unitImages || []
         }));
 
@@ -170,47 +124,68 @@ const Properties = () => {
       } else {
         setUnits([]);
       }
-      console.log('Fetched units:', fetchedUnits);
     }
-    console.log('Selected Property:', property ? property.id : 'No property selected');
+    setIsLoading(false);
     setIsUnitsModalOpen(true);
   };
 
-  const handleAddUnit = (propertyId: string, unitData: any) => {
-    // const newUnit: Unit = {
-    //   id: (units.length + 1).toString(),
-    //   propertyId,
-    //   unitNumber: unitData.unitNumber,
-    //   bedrooms: unitData.bedrooms,
-    //   bathrooms: unitData.bathrooms,
-    //   squareFeet: unitData.squareFeet,
-    //   monthlyRent: unitData.monthlyRent,
-    //   status: unitData.status,
-    //   amenities: unitData.amenities,
-    //   description: unitData.description,
-    //   images: unitData.images
-    // };
+  const handleAddUnit = async (propertyId: string, unitData: any) => {
+    if (!propertyId) {
+      alert('Issue Occurred: Property-ID could not be determined.');
+      return;
+    }
 
-    // setUnits(prev => [...prev, newUnit]);
+    const newUnit = await insertUnit({ propertyId, ...unitData })
+    console.log('New Apartment Data:', newUnit);
+
+    // format the new unit data
+
+    // get data from properties table
+    if (!newUnit) return;
+
+    const property = properties.find(p => p.id === newUnit.property_id);
+    if (!property) {
+      alert('Issue Occurred: Property not found.');
+      return;
+    }
+
+    const formattedUnit = {
+      id: newUnit.id,
+      propertyId: newUnit.property_id,
+      unitNumber: newUnit.unit,
+      bedrooms: newUnit.numberOfbedRooms,
+      bathrooms: newUnit.numberOfBath,
+      squareFeet: newUnit.squareFeet,
+      monthlyRent: property.monthlyRent,
+      status: newUnit.status,
+      tenantId: newUnit.tenant_id || null,
+      tenantName: newUnit.name || null,
+      leaseStart: newUnit.lease_start_date || null,
+      leaseEnd: newUnit.lease_end_date || null,
+      amenities: property.amenities || [],
+      description: property.description || '',
+      images: newUnit.unitImages || []
+    };
+
+    setUnits(prev => [...prev, formattedUnit]);
   };
 
   const handleEditUnit = (unitId: string, unitData: any) => {
-    // setUnits(prev => prev.map(unit =>
-    //   unit.id === unitId
-    //     ? {
-    //       ...unit,
-    //       unitNumber: unitData.unitNumber,
-    //       bedrooms: unitData.bedrooms,
-    //       bathrooms: unitData.bathrooms,
-    //       squareFeet: unitData.squareFeet,
-    //       monthlyRent: unitData.monthlyRent,
-    //       status: unitData.status,
-    //       amenities: unitData.amenities,
-    //       description: unitData.description,
-    //       images: unitData.images
-    //     }
-    //     : unit
-    // ));
+
+    
+    setUnits(prev => prev.map(unit =>
+      unit.id === unitId
+        ? {
+          ...unit,
+          unitNumber: unitData.unitNumber,
+          bedrooms: unitData.bedrooms,
+          bathrooms: unitData.bathrooms,
+          squareFeet: unitData.squareFeet,
+          status: unitData.status,
+          images: unitData.images
+        }
+        : unit
+    ));
   };
 
   const handleCloseForm = () => {
@@ -218,24 +193,52 @@ const Properties = () => {
     setEditingProperty(null);
   };
 
-
   const fetchProperties = async () => {
     const properties = await getAllProperties();
-    if (Array.isArray(properties)) {
-      const formattedProperties = properties.map((property: any) => ({
-        id: property.id,
-        name: `${property.property_name}, ${property.property_type}`,
-        address: `${property.street_address}, ${property.city}, ${property.states}, ${property.zip_code}`,
-        units: property.number_of_units,
-        occupied: 0,
-        available: 0,
-        monthlyRent: property.monthly_rent,
-        imageUrl: property.property_image || 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg'
-      }));
-      // You can now use formattedProperties as needed
-      //cast formattedProperties to Array
 
-      setProperties([...formattedProperties]);
+    if (!properties) {
+      console.error('Failed to fetch properties');
+      return;
+    }
+
+    if (Array.isArray(properties)) {
+
+      // get apartment units using property id
+      for (const property of properties) {
+        // Fetch units for each property
+        const unitsData = await getUnitsByPropertyId(property.id);
+
+        if (!unitsData) {
+          console.error(`Failed to fetch units for property ID ${property.id}`);
+          continue; // Skip this property if units cannot be fetched
+        }
+
+        let totalUnits = 0;
+        let occupiedUnits = 0;
+        let availableUnits = 0;
+
+        if (Array.isArray(unitsData)) {
+          totalUnits = unitsData.length; // Assuming unitsData is an array of units
+          occupiedUnits = unitsData.filter((unit: any) => unit.status === 'occupied').length;
+          availableUnits = unitsData.filter((unit: any) => unit.status === 'available').length;
+        }
+
+        const formattedProperty = {
+          id: property.id,
+          name: `${property.property_name}, ${property.property_type}`,
+          address: `${property.street_address}, ${property.city}, ${property.states}, ${property.zip_code}`,
+          units: totalUnits,
+          occupied: occupiedUnits,
+          available: availableUnits,
+          amenities: property.amenities || [],
+          description: property.description || '',
+          monthlyRent: property.monthly_rent,
+          imageUrl: property.property_image || 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg'
+        };
+
+        setProperties(prev => [...prev, formattedProperty]);
+      }
+
     } else {
       // Handle the error case here (properties is a PostgrestError)
       console.error('Failed to fetch properties:', properties);
@@ -259,6 +262,7 @@ const Properties = () => {
         onViewUnits={handleViewUnits}
         onEditProperty={handleEditPropertyClick}
         onDeleteProperty={handleDeletePropertyClick}
+        isLoading={(property: Property) => isLoading && selectedProperty?.id === property.id}
       />
 
       <PropertyForm

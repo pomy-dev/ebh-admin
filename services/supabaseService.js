@@ -1,4 +1,5 @@
 import supabase from "@/utils/supabase/supabase";
+import { uploadFileToStorage } from "@/utils/uploads";
 
 // CRUD operations for properties
 export async function insertProperty(data) {
@@ -22,7 +23,13 @@ export async function getPropertyById(id) {
     .select("*")
     .eq("id", id)
     .single();
-  return { data, error };
+  // Check if the property was found
+  if (error) {
+    console.error("Error fetching property by ID:", error);
+    return error;
+  }
+
+  return data;
 }
 
 export async function updateProperty(id, updates) {
@@ -30,7 +37,12 @@ export async function updateProperty(id, updates) {
     .from("properties")
     .update(updates)
     .eq("id", id);
-  return { data, error };
+  if (error) {
+    console.error("Error updating property:", error);
+    return error;
+  }
+
+  return data;
 }
 
 export async function deleteProperty(id) {
@@ -43,21 +55,43 @@ export async function deleteProperty(id) {
 
 // CRUD operations for units
 export async function insertUnit(units) {
-  const response = await supabase.from("property_apartments").insert([units]).select('*').single();
-  const data = await supabase.from("property_apartments").insert([units]).select('*');
+  const images = units.images || [];
+  const unitImages = await Promise.all(
+    images.map(async (image) => {
+      const imgPublicUrl = await uploadFileToStorage('apartments', image);
+      if (!imgPublicUrl) {
+        console.error("Failed to upload image");
+        return null;
+      }
+      return imgPublicUrl; // Return the public URL of the uploaded image
+    })
+  );
+
+  const response = await supabase.from("property_apartments")
+    .insert([{
+      unit: units.unitNumber,
+      property_id: units.propertyId,
+      status: units.status,
+      numberOfbedRooms: units.bedrooms,
+      numberOfBath: units.bathrooms,
+      squareFeet: units.squareFeet,
+      unitImages: unitImages.filter(url => url !== null),
+    }])
+    .select('*')
+    .single();
+
   if (response.error) {
     console.error("Error inserting unit:", response.error);
     return response.error;
   }
-  console.log('Response from insertUnit:', response);
-  console.log('Data from insertUnit:', data);
+
   return response.data; // returns full object with `data` and `error`
 }
 
 export async function getUnitsByPropertyId(id) {
   const { data, error } = await supabase
     .from("property_apartments")
-    .select("*, properties(monthly_rent, property_name, street_address, city, states, zip_code, amenities)")
+    .select("*, properties(monthly_rent, property_name, description, street_address, city, states, zip_code, amenities)")
     .eq("property_id", id);
   if (error) {
     console.error("Error fetching units:", error);

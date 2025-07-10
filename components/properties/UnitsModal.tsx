@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { X, Home, Bed, Bath, Maximize, Plus, Edit, User, Calendar } from 'lucide-react';
 import { Unit, Property } from '@/types';
 import UnitForm from './UnitForm';
@@ -26,10 +26,7 @@ const UnitsModal: React.FC<UnitsModalProps> = ({
   const [isUnitFormOpen, setIsUnitFormOpen] = useState(false);
   const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  useEffect(() => {
-
-  }, []);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -68,6 +65,7 @@ const UnitsModal: React.FC<UnitsModalProps> = ({
   };
 
   const handleUnitFormSubmit = (unitData: any) => {
+    setIsSubmitting(true);
     if (property) {
       if (editingUnit) {
         onEditUnit(editingUnit.id, unitData);
@@ -75,11 +73,13 @@ const UnitsModal: React.FC<UnitsModalProps> = ({
         onAddUnit(property.id, unitData);
       }
     }
-    setIsUnitFormOpen(false);
-    setEditingUnit(null);
+    setTimeout(() => {
+      setEditingUnit(null);
+    }, 1000);
   };
 
   const handleUnitFormClose = () => {
+    setIsSubmitting(false);
     setIsUnitFormOpen(false);
     setEditingUnit(null);
   };
@@ -382,6 +382,7 @@ const UnitsModal: React.FC<UnitsModalProps> = ({
         isOpen={isUnitFormOpen}
         onClose={handleUnitFormClose}
         onSubmit={handleUnitFormSubmit}
+        isSubmitting={isSubmitting}
         propertyName={property.name}
         unit={editingUnit}
       />

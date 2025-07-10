@@ -2,9 +2,10 @@ export interface Property {
   id: string;
   name: string;
   address: string;
-  units: number;
   occupied: number;
   available: number;
+  amenities: string[];
+  description: string;
   monthlyRent: number;
   imageUrl: string;
 }

@@ -26,7 +26,7 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
   const [showFilters, setShowFilters] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const [userDetailsMap, setUserDetailsMap] = useState({});
-   const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
 
   // Fetch user details for all tenants using their user_id
   useEffect(() => {
@@ -123,21 +123,21 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
                 <button
-                  onClick={() => {/* implement exportToCSV */}}
+                  onClick={() => {/* implement exportToCSV */ }}
                   className="w-full flex items-center space-x-2 px-4 py-3 text-left hover:bg-gray-50"
                 >
                   <FileText className="w-4 h-4 text-green-600" />
                   <span>Export as CSV</span>
                 </button>
                 <button
-                  onClick={() => {/* implement exportToExcel */}}
+                  onClick={() => {/* implement exportToExcel */ }}
                   className="w-full flex items-center space-x-2 px-4 py-3 text-left hover:bg-gray-50"
                 >
                   <FileSpreadsheet className="w-4 h-4 text-green-600" />
                   <span>Export as Excel</span>
                 </button>
                 <button
-                  onClick={() => {/* implement exportToWord */}}
+                  onClick={() => {/* implement exportToWord */ }}
                   className="w-full flex items-center space-x-2 px-4 py-3 text-left hover:bg-gray-50"
                 >
                   <FileX className="w-4 h-4 text-blue-600" />
@@ -189,115 +189,115 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
 
       {/* Tenants Cards */}
 
-            {isLoadingUsers ? (
+      {isLoadingUsers ? (
         <div className="flex justify-center py-20 text-blue-600">
           <Loader2 className="animate-spin w-6 h-6 mr-2" />
           <span>Loading tenant data...</span>
         </div>
       ) : (
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredTenants.map((t) => {
-          const user = userDetailsMap[t.user_id] || {};
-          return (
-            <div key={t.id} className="bg-white rounded-xl shadow-sm p-6">
-              <div className="flex justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <User className="w-5 h-5 text-blue-600" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredTenants.map((t) => {
+            const user = userDetailsMap[t.user_id] || {};
+            return (
+              <div key={t.id} className="bg-white rounded-xl shadow-sm p-6">
+                <div className="flex justify-between mb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <User className="w-5 h-5 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-800">
+                        {user.name || t.user_id}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          t.status
+                        )}`}
+                      >
+                        {t.status}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {user.name || t.user_id}
-                    </h3>
-                    <span
-                      className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                        t.status
-                      )}`}
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => onEditTenant(t)}
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
                     >
-                      {t.status}
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => onDeleteTenant(t.id)}
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-sm text-gray-600 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <Mail className="w-4 h-4" />
+                    <span>{user.email || "Loading..."}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Phone className="w-4 h-4" />
+                    <span>{user.user_number || "Loading..."}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="w-4 h-4" />
+                    <span>
+                      {"property ID :" + t.property_id} - Unit {t.unit_number}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => onEditTenant(t)}
-                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
-                  >
-                    <Edit className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => onDeleteTenant(t.id)}
-                    className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
 
-              <div className="space-y-2 text-sm text-gray-600 mb-4">
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
-                  <span>{user.email || "Loading..."}</span>
+                {/* Lease & Payment */}
+                <div className="border-t pt-4 space-y-2 text-sm text-gray-600">
+                  <div className="flex justify-between">
+                    <span>Monthly Rent</span>
+                    <span className="font-semibold text-gray-800">
+                      E{t.monthly_rent}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Lease</span>
+                    <span>
+                      {t.lease_start_date} - {t.lease_end_date}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Outstanding</span>
+                    <span
+                      className={
+                        t.paymentHistory?.outstandingBalance > 0
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }
+                    >
+                      E{t.paymentHistory?.outstandingBalance || 0}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Last Payment</span>
+                    <span>{t.paymentHistory?.lastPayment}</span>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <Phone className="w-4 h-4" />
-                  <span>{user.user_number || "Loading..."}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <MapPin className="w-4 h-4" />
-                  <span>
-                    {"property ID :" + t.property_id} - Unit {t.unit_number}
-                  </span>
-                </div>
-              </div>
 
-              {/* Lease & Payment */}
-              <div className="border-t pt-4 space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>Monthly Rent</span>
-                  <span className="font-semibold text-gray-800">
-                    E{t.monthly_rent}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Lease</span>
-                  <span>
-                    {t.lease_start_date} - {t.lease_end_date}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Outstanding</span>
-                  <span
-                    className={
-                      t.paymentHistory?.outstandingBalance > 0
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }
-                  >
-                    E{t.paymentHistory?.outstandingBalance || 0}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Last Payment</span>
-                  <span>{t.paymentHistory?.lastPayment}</span>
+                <div className="border-t pt-4 mt-4 text-sm text-gray-600">
+                  <h4 className="font-medium mb-1">Emergency Contact</h4>
+                  <div>
+                    {t.emergency_name} ({t.relationship})
+                  </div>
+                  <div className="flex items-center space-x-1">
+                    <Phone className="w-3 h-3" />
+                    <span>{t.emergency_phone}</span>
+                  </div>
                 </div>
               </div>
-
-              <div className="border-t pt-4 mt-4 text-sm text-gray-600">
-                <h4 className="font-medium mb-1">Emergency Contact</h4>
-                <div>
-                  {t.emergency_name} ({t.relationship})
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Phone className="w-3 h-3" />
-                  <span>{t.emergency_phone}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      )} 
+            );
+          })}
+        </div>
+      )}
 
       {filteredTenants.length === 0 && (
         <div className="text-center py-12">
@@ -309,7 +309,7 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
           </p>
         </div>
       )}
-      
+
     </div>
   );
 };

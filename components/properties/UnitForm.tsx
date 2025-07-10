@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Home, Bed, Bath, Maximize, DollarSign, Image as ImageIcon } from 'lucide-react';
+import { X, Home, Bed, Bath, Maximize, Image as ImageIcon } from 'lucide-react';
 import { Unit } from '@/types';
 import { ImSpinner2 } from "react-icons/im";
 
@@ -10,42 +10,30 @@ interface UnitFormData {
   bedrooms: number;
   bathrooms: number;
   squareFeet: number;
-  monthlyRent: number;
   status: 'available' | 'occupied' | 'maintenance';
-  amenities: string[];
-  images: string[];
+  images: any[];
 }
 
 interface UnitFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: UnitFormData) => void;
+  isSubmitting?: boolean;
   propertyName: string;
   unit?: Unit | null;
 }
 
-const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, propertyName, unit }) => {
+const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmitting, propertyName, unit }) => {
   const [formData, setFormData] = useState<UnitFormData>({
     unitNumber: unit?.unitNumber || '',
     bedrooms: unit?.bedrooms || 1,
     bathrooms: unit?.bathrooms || 1,
     squareFeet: unit?.squareFeet || 0,
-    monthlyRent: unit?.monthlyRent || 0,
     status: unit?.status || 'available',
-    amenities: unit?.amenities || [],
     images: unit?.images || []
   });
   const [errors, setErrors] = useState<Partial<Record<keyof UnitFormData, string>>>({});
   const [newImageUrl, setNewImageUrl] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const availableAmenities = [
-    'Balcony/Patio', 'Walk-in Closet', 'Hardwood Floors', 'Carpet',
-    'Tile Flooring', 'Granite Countertops', 'Stainless Steel Appliances',
-    'Dishwasher', 'Microwave', 'Refrigerator', 'Washer/Dryer In-Unit',
-    'Washer/Dryer Hookups', 'Central Air', 'Ceiling Fans', 'Fireplace',
-    'Bay Windows', 'High Ceilings', 'Updated Kitchen', 'Updated Bathroom'
-  ];
 
   React.useEffect(() => {
     if (unit && isOpen) {
@@ -54,9 +42,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
         bedrooms: unit.bedrooms,
         bathrooms: unit.bathrooms,
         squareFeet: unit.squareFeet,
-        monthlyRent: unit.monthlyRent,
         status: unit.status,
-        amenities: unit.amenities,
         images: unit.images
       });
     } else if (!unit && isOpen) {
@@ -65,9 +51,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
         bedrooms: 1,
         bathrooms: 1,
         squareFeet: 0,
-        monthlyRent: 0,
         status: 'available',
-        amenities: [],
         images: []
       });
     }
@@ -89,15 +73,6 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
     }
   };
 
-  const handleAmenityToggle = (amenity: string) => {
-    setFormData(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(amenity)
-        ? prev.amenities.filter(a => a !== amenity)
-        : [...prev.amenities, amenity]
-    }));
-  };
-
   const handleRemoveImage = (imageUrl: string) => {
     setFormData(prev => ({
       ...prev,
@@ -112,7 +87,6 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
     if (formData.bedrooms < 0) newErrors.bedrooms = 'Bedrooms must be 0 or greater';
     if (formData.bathrooms < 1) newErrors.bathrooms = 'Must have at least 1 bathroom';
     if (formData.squareFeet <= 0) newErrors.squareFeet = 'Square feet must be greater than 0';
-    if (formData.monthlyRent <= 0) newErrors.monthlyRent = 'Monthly rent must be greater than 0';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -120,36 +94,19 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     if (validateForm()) {
       onSubmit(formData);
     }
-    setIsLoading(false);
     setNewImageUrl('');
     setFormData({
       unitNumber: '',
       bedrooms: 1,
       bathrooms: 1,
       squareFeet: 0,
-      monthlyRent: 0,
       status: 'available',
-      amenities: [],
       images: []
     })
-    onClose();
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'available':
-        return 'bg-green-100 text-green-800';
-      case 'occupied':
-        return 'bg-blue-100 text-blue-800';
-      case 'maintenance':
-        return 'bg-yellow-100 text-yellow-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
+    setTimeout(() => { onClose() }, 2000);
   };
 
   if (!isOpen) return null;
@@ -187,7 +144,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
               Unit Details
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Unit Number *
@@ -218,26 +175,6 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
                   <option value="occupied">Occupied</option>
                   <option value="maintenance">Under Maintenance</option>
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monthly Rent *
-                </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
-                  <input
-                    type="number"
-                    name="monthlyRent"
-                    value={formData.monthlyRent}
-                    onChange={handleInputChange}
-                    min="0"
-                    className={`w-full pl-12 pr-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.monthlyRent ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    placeholder="2500"
-                  />
-                </div>
-                {errors.monthlyRent && <p className="text-red-500 text-sm mt-1">{errors.monthlyRent}</p>}
               </div>
             </div>
 
@@ -319,11 +256,9 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
                   onChange={async (e) => {
                     if (e.target.files && e.target.files[0]) {
                       const file = e.target.files[0];
-                      // Convert file to a local URL for preview (not for production uploads)
-                      const localUrl = URL.createObjectURL(file);
                       setFormData(prev => ({
                         ...prev,
-                        images: [...prev.images, localUrl]
+                        images: [...prev.images, file]
                       }));
                       setNewImageUrl(e.target.value)
                     }
@@ -336,22 +271,26 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
 
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {formData.images.map((imageUrl, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={imageUrl}
-                        alt={`Unit image ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-lg"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(imageUrl)}
-                        className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                  {formData.images.map((file, index) => {
+                    // Use URL.createObjectURL for local file previews
+                    const localUrl = URL.createObjectURL(file);
+                    return (
+                      <div key={index} className="relative group">
+                        <img
+                          src={localUrl}
+                          alt={`Unit image ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(file)}
+                          className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>
@@ -370,7 +309,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, property
               type="submit"
               className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
-              {isLoading ? <ImSpinner2 className='font-size-10 animate-spin' /> : unit ? 'Update Unit' : 'Add Unit'}
+              {isSubmitting ? <ImSpinner2 className='w-4 h-4 animate-spin' /> : unit ? 'Update Unit' : 'Add Unit'}
             </button>
           </div>
         </form>
