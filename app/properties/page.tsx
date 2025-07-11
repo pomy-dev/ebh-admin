@@ -56,6 +56,7 @@ const Properties = () => {
       const updatedProperty: Property = {
         ...editingProperty,
         name: formData.name,
+        amenities: formData.amenities || [],
         address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
         imageUrl: formData.imageUrl || editingProperty.imageUrl
       };
@@ -89,7 +90,6 @@ const Properties = () => {
     }
     setProperties(prev => prev.filter(p => p.id !== property.id));
   };
-  gdfd
 
   const handleViewUnits = async (property: Property) => {
     setSelectedProperty(property);
