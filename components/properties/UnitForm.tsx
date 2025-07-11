@@ -298,7 +298,14 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {formData.images.map((file, index) => {
                     // Use URL.createObjectURL for local file previews
-                    const localUrl = URL.createObjectURL(file);
+                    let localUrl = '';
+
+                    if (file.startWith('https://')) {
+                      localUrl = file;
+                    } else {
+                      localUrl = URL.createObjectURL(file);
+                    }
+
                     return (
                       <div key={index} className="relative group">
                         <img
