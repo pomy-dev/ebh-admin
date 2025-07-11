@@ -55,6 +55,7 @@ export async function deleteProperty(id) {
 
 // CRUD operations for units
 export async function insertUnit(units) {
+  console.log('Inserting unit:', units);
   const images = units.images || [];
   const unitImages = await Promise.all(
     images.map(async (image) => {
@@ -74,6 +75,7 @@ export async function insertUnit(units) {
       status: units.status,
       numberOfbedRooms: units.bedrooms,
       numberOfBath: units.bathrooms,
+      monthly_rent: units.monthlyRent,
       squareFeet: units.squareFeet,
       unitImages: unitImages.filter(url => url !== null),
     }])
@@ -91,7 +93,7 @@ export async function insertUnit(units) {
 export async function getUnitsByPropertyId(id) {
   const { data, error } = await supabase
     .from("property_apartments")
-    .select("*, properties(monthly_rent, property_name, description, street_address, city, states, zip_code, amenities)")
+    .select("*, properties(property_name, street_address, city, states, zip_code, amenities, rules)")
     .eq("property_id", id);
   if (error) {
     console.error("Error fetching units:", error);

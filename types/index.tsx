@@ -2,11 +2,12 @@ export interface Property {
   id: string;
   name: string;
   address: string;
+  units: number;
   occupied: number;
   available: number;
+  maintenance: number;
+  rules?: string[];
   amenities: string[];
-  description: string;
-  monthlyRent: number;
   imageUrl: string;
 }
 
@@ -24,7 +25,6 @@ export interface Unit {
   leaseStart?: string;
   leaseEnd?: string;
   amenities: string[];
-  description: string;
   images: string[];
 }
 

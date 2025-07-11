@@ -10,10 +10,9 @@ interface PropertyFormData {
   city: string;
   state: string;
   zipCode: string;
-  monthlyRent: number;
   propertyType: string;
-  description: string;
   amenities: string[];
+  rules: string[];
   imageUrl: string;
 }
 
@@ -31,28 +30,25 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
     city: property?.address?.split(',')[1]?.trim() || '',
     state: property?.address?.split(',')[2]?.trim()?.split(' ')[0] || '',
     zipCode: property?.address?.split(',')[2]?.trim()?.split(' ')[1] || '',
-    monthlyRent: property?.monthlyRent || 0,
     propertyType: 'apartment',
-    description: '',
+    rules: [],
     amenities: [],
     imageUrl: property?.imageUrl || ''
   });
-
   const [errors, setErrors] = useState<Partial<Record<keyof PropertyFormData, string>>>({});
-
   const propertyTypes = [
-    { value: 'apartment', label: 'Apartment Complex' },
-    { value: 'condo', label: 'Condominium' },
-    { value: 'townhouse', label: 'Townhouse' },
-    { value: 'single-family', label: 'Single Family Home' },
-    { value: 'duplex', label: 'Duplex' }
+    { value: 'Apartment', label: 'Apartment Complex' },
+    { value: 'Condo', label: 'Condominium' },
+    { value: 'Townhouse', label: 'Townhouse' },
+    { value: 'Single-family', label: 'Single Family Home' },
+    { value: 'Duplex', label: 'Duplex' }
   ];
-
   const availableAmenities = [
     'Swimming Pool', 'Gym/Fitness Center', 'Parking Garage', 'Laundry Facility',
     'Pet Friendly', 'Balcony/Patio', 'Air Conditioning', 'Dishwasher',
     'In-Unit Washer/Dryer', 'Elevator', 'Security System', 'Concierge'
   ];
+  const [newRule, setNewRule] = useState('');
 
   React.useEffect(() => {
     if (property && isOpen) {
@@ -65,9 +61,8 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
         city: addressParts[1]?.trim() || '',
         state: stateZip[0] || '',
         zipCode: stateZip[1] || '',
-        monthlyRent: property.monthlyRent,
         propertyType: 'apartment',
-        description: '',
+        rules: property.rules || [],
         amenities: [],
         imageUrl: property.imageUrl
       });
@@ -78,9 +73,8 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
         city: '',
         state: '',
         zipCode: '',
-        monthlyRent: 0,
         propertyType: 'apartment',
-        description: '',
+        rules: [],
         amenities: [],
         imageUrl: ''
       });
@@ -120,8 +114,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.state.trim()) newErrors.state = 'State is required';
     if (!formData.zipCode.trim()) newErrors.zipCode = 'ZIP code is required';
-    if (formData.monthlyRent <= 0) newErrors.monthlyRent = 'Monthly rent must be greater than 0';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -132,6 +124,16 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
     if (validateForm()) {
       onSubmit(formData);
       onClose();
+    }
+  };
+
+  const handleAddRule = () => {
+    if (newRule.trim() && !formData.rules.includes(newRule.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        rules: [...prev.rules, newRule]
+      }));
+      setNewRule('');
     }
   };
 
@@ -201,22 +203,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
                   ))}
                 </select>
               </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description *
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                rows={4}
-                className={`w-full px-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.description ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder="Describe the property, its features, and what makes it special..."
-              />
-              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
           </div>
 
@@ -294,37 +280,6 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
             </div>
           </div>
 
-          {/* Property Details */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-              <DollarSign className="w-5 h-5 mr-2 text-blue-600" />
-              Property Details
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Monthly Rent (per unit) *
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-3 text-gray-500">$</span>
-                  <input
-                    type="number"
-                    name="monthlyRent"
-                    value={formData.monthlyRent}
-                    onChange={handleInputChange}
-                    min="0"
-                    className={`w-full pl-8 pr-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.monthlyRent ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                    placeholder="2500"
-                  />
-                </div>
-                {errors.monthlyRent && <p className="text-red-500 text-sm mt-1">{errors.monthlyRent}</p>}
-              </div>
-            </div>
-          </div>
-
           {/* Amenities */}
           <div className="space-y-6">
             <h3 className="text-lg font-semibold text-gray-800">Amenities</h3>
@@ -341,6 +296,50 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
                 </label>
               ))}
             </div>
+          </div>
+
+          {/* add rules to state array */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-800">Property Rules</h3>
+            <div className='flex space-x-2'>
+              <input
+                name="rules"
+                value={newRule}
+                onChange={(e) => setNewRule(e.target.value)}
+                className="flex-1 px-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all border-gray-300"
+                placeholder="Enter property rules"
+              />
+              {/* add button */}
+              <button
+                type="button"
+                onClick={handleAddRule}
+                className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Set Rule
+              </button>
+            </div>
+            {/* preview rules added */}
+            {formData.rules.length > 0 ?
+              <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                {formData.rules.map((rule, index) => (
+                  <li key={index} className="flex justify-between px-2 py-1 text-md bg-blue-200 rounded-lg text-gray-600">
+                    {rule}
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({
+                        ...prev,
+                        rules: prev.rules.filter((_, i) => i !== index)
+                      }))}
+                      className="text-red-600 bg-red-200 rounded-full px-2 items-center justify-center text-lg hover:text-red-800"
+                    >
+                      &times;
+                    </button>
+                  </li>
+                ))}
+              </ul> :
+              <p className="text-sm text-gray-500">
+                Add rules for the property, such as "No smoking", "Pet restrictions", etc.
+              </p>}
           </div>
 
           {/* Image Upload */}
@@ -366,7 +365,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
                     reader.readAsDataURL(file);
                   }
                 }}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all"
+                className="w-full text-gray-400 placeholder-gray-300 px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all"
               />
               {formData.imageUrl ? (
                 <img

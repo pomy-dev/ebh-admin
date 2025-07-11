@@ -69,8 +69,8 @@ const PropertyList: React.FC<PropertyListProps> = ({ properties, onViewUnits, on
                         <span className="font-medium text-blue-600">{property.available}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Monthly Rent</span>
-                        <span className="font-medium py-1 px-3 rounded-full bg-red-200 text-red-400">${property.monthlyRent}</span>
+                        <span className="text-gray-600">Maintenance</span>
+                        <span className="font-medium py-1 px-3 rounded-full bg-red-200 text-red-400">{property.maintenance}</span>
                       </div>
                     </div>
 

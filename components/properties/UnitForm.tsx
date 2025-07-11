@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Home, Bed, Bath, Maximize, Image as ImageIcon } from 'lucide-react';
+import { X, Home, Bed, Bath, Maximize, Image as ImageIcon, DollarSign } from 'lucide-react';
 import { Unit } from '@/types';
 import { ImSpinner2 } from "react-icons/im";
 
@@ -9,6 +9,7 @@ interface UnitFormData {
   unitNumber: string;
   bedrooms: number;
   bathrooms: number;
+  monthlyRent: number;
   squareFeet: number;
   status: 'available' | 'occupied' | 'maintenance';
   images: any[];
@@ -29,6 +30,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
     bedrooms: unit?.bedrooms || 1,
     bathrooms: unit?.bathrooms || 1,
     squareFeet: unit?.squareFeet || 0,
+    monthlyRent: unit?.monthlyRent || 0,
     status: unit?.status || 'available',
     images: unit?.images || []
   });
@@ -42,6 +44,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
         bedrooms: unit.bedrooms,
         bathrooms: unit.bathrooms,
         squareFeet: unit.squareFeet,
+        monthlyRent: unit.monthlyRent,
         status: unit.status,
         images: unit.images
       });
@@ -51,6 +54,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
         bedrooms: 1,
         bathrooms: 1,
         squareFeet: 0,
+        monthlyRent: 0,
         status: 'available',
         images: []
       });
@@ -86,6 +90,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
     if (!formData.unitNumber.trim()) newErrors.unitNumber = 'Unit number is required';
     if (formData.bedrooms < 0) newErrors.bedrooms = 'Bedrooms must be 0 or greater';
     if (formData.bathrooms < 1) newErrors.bathrooms = 'Must have at least 1 bathroom';
+    if (formData.monthlyRent <= 0) newErrors.monthlyRent = 'Rent price cannot be E00.00';
     if (formData.squareFeet <= 0) newErrors.squareFeet = 'Square feet must be greater than 0';
 
     setErrors(newErrors);
@@ -103,6 +108,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
       bedrooms: 1,
       bathrooms: 1,
       squareFeet: 0,
+      monthlyRent: 0,
       status: 'available',
       images: []
     })
@@ -144,7 +150,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
               Unit Details
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Unit Number *
@@ -175,6 +181,25 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
                   <option value="occupied">Occupied</option>
                   <option value="maintenance">Under Maintenance</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Monthly Rent *
+                </label>
+                <div className="relative">
+                  <DollarSign className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <input
+                    type="number"
+                    name="monthlyRent"
+                    value={formData.monthlyRent}
+                    onChange={handleInputChange}
+                    min="0"
+                    className={`w-full pl-12 pr-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${errors.bedrooms ? 'border-red-500' : 'border-gray-300'
+                      }`}
+                  />
+                </div>
+                {errors.monthlyRent && <p className="text-red-500 text-sm mt-1">{errors.monthlyRent}</p>}
               </div>
             </div>
 

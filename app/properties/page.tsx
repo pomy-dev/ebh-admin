@@ -22,18 +22,16 @@ const Properties = () => {
     fetchProperties();
   }, [])
 
-
   const handleAddProperty = async (formData: any) => {
     const newProperty = await insertProperty({
       property_name: formData.name,
       property_type: formData.propertyType,
       street_address: formData.address,
-      description: formData.description,
       city: formData.city,
       states: formData.state,
       zip_code: formData.zipCode,
       amenities: formData.amenities || [],
-      monthly_rent: formData.monthlyRent,
+      rules: formData.rules || [],
       property_image: formData.imageUrl || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJUV3wqQOzLU4NwuFxKS12YFxsJcP5W61KOQ&s'
     });
 
@@ -41,12 +39,11 @@ const Properties = () => {
       id: newProperty.id,
       name: `${newProperty.property_name}, ${newProperty.property_type}`,
       address: `${newProperty.street_address}, ${newProperty.city}, ${newProperty.states}, ${newProperty.zip_code}`,
-      units: newProperty.number_of_units,
+      units: 0,
       occupied: 0,
       available: 0,
+      maintenance: 0,
       amenities: newProperty.amenities || [],
-      description: newProperty.description || '',
-      monthlyRent: newProperty.monthly_rent,
       imageUrl: newProperty.property_image || 'https://www.pngkey.com/png/detail/266-2665301_jpg-freeuse-library-apartment-for-rent-clipart-house.png'
     }
 
@@ -60,7 +57,6 @@ const Properties = () => {
         ...editingProperty,
         name: formData.name,
         address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
-        monthlyRent: formData.monthlyRent,
         imageUrl: formData.imageUrl || editingProperty.imageUrl
       };
 
@@ -109,14 +105,13 @@ const Properties = () => {
           bedrooms: unit.numberOfbedRooms,
           bathrooms: unit.numberOfBath,
           squareFeet: unit.squareFeet,
-          monthlyRent: unit.properties.monthly_rent,
+          monthlyRent: unit.monthly_rent,
           status: unit.status,
           tenantId: unit.tenant_id || null,
           tenantName: unit.name || null,
           leaseStart: unit.lease_start_date || null,
           leaseEnd: unit.lease_end_date || null,
           amenities: unit.properties.amenities || [],
-          description: unit.properties.description || '',
           images: unit.unitImages || []
         }));
 
@@ -138,8 +133,6 @@ const Properties = () => {
     const newUnit = await insertUnit({ propertyId, ...unitData })
     console.log('New Apartment Data:', newUnit);
 
-    // format the new unit data
-
     // get data from properties table
     if (!newUnit) return;
 
@@ -156,14 +149,13 @@ const Properties = () => {
       bedrooms: newUnit.numberOfbedRooms,
       bathrooms: newUnit.numberOfBath,
       squareFeet: newUnit.squareFeet,
-      monthlyRent: property.monthlyRent,
+      monthlyRent: newUnit.monthly_rent,
       status: newUnit.status,
       tenantId: newUnit.tenant_id || null,
       tenantName: newUnit.name || null,
       leaseStart: newUnit.lease_start_date || null,
       leaseEnd: newUnit.lease_end_date || null,
       amenities: property.amenities || [],
-      description: property.description || '',
       images: newUnit.unitImages || []
     };
 
@@ -172,7 +164,7 @@ const Properties = () => {
 
   const handleEditUnit = (unitId: string, unitData: any) => {
 
-    
+
     setUnits(prev => prev.map(unit =>
       unit.id === unitId
         ? {
@@ -216,11 +208,13 @@ const Properties = () => {
         let totalUnits = 0;
         let occupiedUnits = 0;
         let availableUnits = 0;
+        let onMaintenanceUnits = 0;
 
         if (Array.isArray(unitsData)) {
           totalUnits = unitsData.length; // Assuming unitsData is an array of units
           occupiedUnits = unitsData.filter((unit: any) => unit.status === 'occupied').length;
           availableUnits = unitsData.filter((unit: any) => unit.status === 'available').length;
+          onMaintenanceUnits = unitsData.filter((unit: any) => unit.status === 'maintenance').length;
         }
 
         const formattedProperty = {
@@ -230,9 +224,9 @@ const Properties = () => {
           units: totalUnits,
           occupied: occupiedUnits,
           available: availableUnits,
+          maintenance: onMaintenanceUnits, // Assuming maintenance is a field in the property
           amenities: property.amenities || [],
-          description: property.description || '',
-          monthlyRent: property.monthly_rent,
+          rules: property.rules || [],
           imageUrl: property.property_image || 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg'
         };
 
