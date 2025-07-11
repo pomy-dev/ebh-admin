@@ -89,6 +89,7 @@ const Properties = () => {
     }
     setProperties(prev => prev.filter(p => p.id !== property.id));
   };
+  gdfd
 
   const handleViewUnits = async (property: Property) => {
     setSelectedProperty(property);
