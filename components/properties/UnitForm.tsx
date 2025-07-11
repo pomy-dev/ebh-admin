@@ -300,7 +300,7 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
                     // Use URL.createObjectURL for local file previews
                     let localUrl = '';
 
-                    if (file.startWith('https://')) {
+                    if (file.startsWith('https://')) {
                       localUrl = file;
                     } else {
                       localUrl = URL.createObjectURL(file);

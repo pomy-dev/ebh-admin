@@ -6,7 +6,7 @@ import PropertyForm from '@/components/properties/PropertyForm';
 import UnitsModal from '@/components/properties/UnitsModal';
 import { Property, Unit } from '@/types';
 import { insertUnit } from '@/services/supabaseService';
-import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId } from '@/services/supabaseService';
+import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId, updateUnit } from '@/services/supabaseService';
 
 const Properties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -162,17 +162,42 @@ const Properties = () => {
     setUnits(prev => [...prev, formattedUnit]);
   };
 
-  const handleEditUnit = (unitId: string, unitData: any) => {
+  const handleEditUnit = async (unitId: any, unitData: any) => {
+    if (!unitId) {
+      alert('Issue Occurred: Unit-ID could not be determined.');
+      return;
+    }
+    const unitDetails = {
+      unit: unitData.unitNumber,
+      numberOfbedRooms: unitData.bedrooms,
+      numberOfBath: unitData.bathrooms,
+      squareFeet: unitData.squareFeet,
+      monthly_rent: unitData.monthlyRent,
+      status: unitData.status,
+      unitImages: unitData.images,
+      updated_at: new Date().toISOString()
+    }
+
+    const updatedUnit = await updateUnit(unitId, unitDetails);
+
+    if (!updatedUnit || (updatedUnit as any).code) {
+      alert('Issue Occurred: Unit could not be updated.');
+      return;
+    }
+
+    console.log('Updated Apartment Data:', updatedUnit);
+
     setUnits(prev => prev.map(unit =>
       unit.id === unitId
         ? {
           ...unit,
-          unitNumber: unitData.unitNumber,
-          bedrooms: unitData.bedrooms,
-          bathrooms: unitData.bathrooms,
-          squareFeet: unitData.squareFeet,
-          status: unitData.status,
-          images: unitData.images
+          unitNumber: (updatedUnit as any).unit,
+          bedrooms: (updatedUnit as any).numberOfbedRooms,
+          bathrooms: (updatedUnit as any).numberOfBath,
+          squareFeet: (updatedUnit as any).squareFeet,
+          monthlyRent: (updatedUnit as any).monthly_rent,
+          status: (updatedUnit as any).status,
+          images: (updatedUnit as any).unitImages
         }
         : unit
     ));
