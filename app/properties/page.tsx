@@ -4,13 +4,12 @@ import React, { useEffect, useState } from 'react';
 import PropertyList from '@/components/properties/PropertyList';
 import PropertyForm from '@/components/properties/PropertyForm';
 import UnitsModal from '@/components/properties/UnitsModal';
-import { properties as initialProperties } from '@/utils/mockData';
 import { Property, Unit } from '@/types';
 import { insertUnit } from '@/services/supabaseService';
 import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId } from '@/services/supabaseService';
 
 const Properties = () => {
-  const [properties, setProperties] = useState(initialProperties);
+  const [properties, setProperties] = useState<Property[]>([]);
   const [units, setUnits] = useState<Unit[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isUnitsModalOpen, setIsUnitsModalOpen] = useState(false);
@@ -164,8 +163,6 @@ const Properties = () => {
   };
 
   const handleEditUnit = (unitId: string, unitData: any) => {
-
-
     setUnits(prev => prev.map(unit =>
       unit.id === unitId
         ? {
@@ -231,7 +228,12 @@ const Properties = () => {
           imageUrl: property.property_image || 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg'
         };
 
-        setProperties(prev => [...prev, formattedProperty]);
+        setProperties(prev => {
+          if (prev.some(p => p.id === formattedProperty.id)) return prev;
+          return [...prev, formattedProperty];
+        });
+
+        // setProperties(prev => [...prev, formattedProperty]);
       }
 
     } else {
