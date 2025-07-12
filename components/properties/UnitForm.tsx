@@ -297,31 +297,43 @@ const UnitForm: React.FC<UnitFormProps> = ({ isOpen, onClose, onSubmit, isSubmit
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {formData.images.map((file, index) => {
-                    // Use URL.createObjectURL for local file previews
-                    let localUrl = '';
-
-                    if (file.startsWith('https://')) {
-                      localUrl = file;
+                    // check if file is an object or a URL
+                    if (typeof file === 'string' && file.startsWith('https://')) {
+                      return (
+                        <div key={index} className="relative group">
+                          <img
+                            src={file}
+                            alt={`Unit image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(file)}
+                            className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )
                     } else {
-                      localUrl = URL.createObjectURL(file);
+                      const localUrl = URL.createObjectURL(file);
+                      return (
+                        <div key={index} className="relative group">
+                          <img
+                            src={localUrl}
+                            alt={`Unit image ${index + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveImage(file)}
+                            className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )
                     }
-
-                    return (
-                      <div key={index} className="relative group">
-                        <img
-                          src={localUrl}
-                          alt={`Unit image ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(file)}
-                          className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    )
                   })}
                 </div>
               )}

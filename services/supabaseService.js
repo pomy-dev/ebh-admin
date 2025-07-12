@@ -104,30 +104,31 @@ export async function getUnitsByPropertyId(id) {
 }
 
 export async function updateUnit(id, updates) {
-  const images = updates.images || [];
+  const images = updates.unitImages || [];
   const unitImages = await Promise.all(
     images.map(async (image) => {
-      const imgPublicUrl = await uploadFileToStorage('apartments', image);
-      if (!imgPublicUrl) {
-        console.error("Failed to upload image");
-        return null;
-      }
-      return imgPublicUrl; // Return the public URL of the uploaded image
+      // Check if the image is a URL or a file object
+      if (typeof image === 'string' && image.startsWith('https://')) {
+        return image; // If it's already a URL, return it directly
+      } else {
+        return await uploadFileToStorage('apartments', image);
+      } // Return the public URL of the uploaded image
     })
   );
 
   const { data, error } = await supabase
     .from("property_apartments")
     .update({
-      unit: updates.unitNumber,
+      unit: updates.unit,
       status: updates.status,
-      numberOfbedRooms: updates.bedrooms,
-      numberOfBath: updates.bathrooms,
-      monthly_rent: updates.monthlyRent,
+      numberOfbedRooms: updates.numberOfbedRooms,
+      numberOfBath: updates.numberOfBath,
+      monthly_rent: updates.monthly_rent,
       squareFeet: updates.squareFeet,
       unitImages: unitImages.filter(url => url !== null),
+      updated_at: new Date().toISOString()
     }).eq("id", id)
-    .select('*');
+    .select().single();
 
   if (error) {
     console.error("Error updating unit:", error);
