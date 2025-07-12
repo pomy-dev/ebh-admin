@@ -174,10 +174,80 @@ const Properties = () => {
       images: newUnit.unitImages || []
     };
 
+    // update property total units, occupied, available, and maintenance counts
+    setProperties(prev => prev.map(p =>
+      p.id === propertyId
+        ? {
+          ...p,
+          units: p.units + 1,
+          available: p.available + (formattedUnit.status === 'available' ? 1 : 0),
+          maintenance: p.maintenance + (formattedUnit.status === 'maintenance' ? 1 : 0),
+          occupied: p.occupied + (formattedUnit.status === 'occupied' ? 1 : 0)
+        }
+        : p
+    ));
+
     setUnits(prev => [...prev, formattedUnit]);
   };
 
+  const handleEditUnit = async (unitId: any, unitData: any) => {
+    if (!unitId) {
+      alert('Issue Occurred: Unit-ID could not be determined.');
+      return;
+    }
+    const unitDetails = {
+      unit: unitData.unitNumber,
+      numberOfbedRooms: unitData.bedrooms,
+      numberOfBath: unitData.bathrooms,
+      squareFeet: unitData.squareFeet,
+      monthly_rent: unitData.monthlyRent,
+      status: unitData.status,
+      unitImages: unitData.images
+    }
 
+    const updatedUnit = await updateUnit(unitId, unitDetails);
+
+    if (!updatedUnit || (updatedUnit as any).code) {
+      alert('Issue Occurred: Unit could not be updated.');
+      return;
+    }
+
+    // get property data from properties table
+    const property = properties.find(p => p.id === (updatedUnit as any).property_id);
+    if (!property) {
+      alert('Issue Occurred: Property not found.');
+      return;
+    }
+
+    // update property total units, occupied, available, and maintenance counts
+    setProperties(prev => prev.map(p =>
+      p.id === property.id
+        ? {
+          ...p,
+          units: p.units, // Total units remain the same
+          occupied: p.occupied + ((updatedUnit as any).status === 'occupied' ? 1 : 0) - (p.occupied > 0 && (updatedUnit as any).status === 'available' ? 1 : 0),
+          available: p.available + ((updatedUnit as any).status === 'available' ? 1 : 0) - (p.available > 0 && (updatedUnit as any).status === 'occupied' ? 1 : 0),
+          maintenance: p.maintenance + ((updatedUnit as any).status === 'maintenance' ? 1 : 0) - (p.maintenance > 0 && (updatedUnit as any).status !== 'maintenance' ? 1 : 0)
+        }
+        : p
+    ));
+
+    setUnits(prev => prev.map(unit =>
+      unit.id === unitId
+        ? {
+          ...unit,
+          unitNumber: (updatedUnit as any).unit,
+          bedrooms: (updatedUnit as any).numberOfbedRooms,
+          bathrooms: (updatedUnit as any).numberOfBath,
+          squareFeet: (updatedUnit as any).squareFeet,
+          monthlyRent: (updatedUnit as any).monthly_rent,
+          status: (updatedUnit as any).status,
+          amenities: property.amenities || [],
+          images: (updatedUnit as any).unitImages
+        }
+        : unit
+    ));
+  };
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
@@ -234,7 +304,6 @@ const Properties = () => {
           return [...prev, formattedProperty];
         });
 
-        // setProperties(prev => [...prev, formattedProperty]);
       }
 
     } else {
