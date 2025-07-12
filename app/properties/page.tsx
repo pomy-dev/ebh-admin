@@ -6,7 +6,7 @@ import PropertyForm from '@/components/properties/PropertyForm';
 import UnitsModal from '@/components/properties/UnitsModal';
 import { Property, Unit } from '@/types';
 import { insertUnit } from '@/services/supabaseService';
-import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId, updateProperty } from '@/services/supabaseService';
+import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId, updateUnit, updateProperty } from '@/services/supabaseService';
 
 const Properties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -182,12 +182,13 @@ const Properties = () => {
       unit.id === unitId
         ? {
           ...unit,
-          unitNumber: unitData.unitNumber,
-          bedrooms: unitData.bedrooms,
-          bathrooms: unitData.bathrooms,
-          squareFeet: unitData.squareFeet,
-          status: unitData.status,
-          images: unitData.images
+          unitNumber: (updatedUnit as any).unit,
+          bedrooms: (updatedUnit as any).numberOfbedRooms,
+          bathrooms: (updatedUnit as any).numberOfBath,
+          squareFeet: (updatedUnit as any).squareFeet,
+          monthlyRent: (updatedUnit as any).monthly_rent,
+          status: (updatedUnit as any).status,
+          images: (updatedUnit as any).unitImages
         }
         : unit
     ));

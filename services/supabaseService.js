@@ -112,3 +112,36 @@ export async function getUnitsByPropertyId(id) {
   console.log("Data from getUnitsByPropertyId:", data);
   return data;
 }
+
+export async function updateUnit(id, updates) {
+  const images = updates.images || [];
+  const unitImages = await Promise.all(
+    images.map(async (image) => {
+      const imgPublicUrl = await uploadFileToStorage('apartments', image);
+      if (!imgPublicUrl) {
+        console.error("Failed to upload image");
+        return null;
+      }
+      return imgPublicUrl; // Return the public URL of the uploaded image
+    })
+  );
+
+  const { data, error } = await supabase
+    .from("property_apartments")
+    .update({
+      unit: updates.unitNumber,
+      status: updates.status,
+      numberOfbedRooms: updates.bedrooms,
+      numberOfBath: updates.bathrooms,
+      monthly_rent: updates.monthlyRent,
+      squareFeet: updates.squareFeet,
+      unitImages: unitImages.filter(url => url !== null),
+    }).eq("id", id)
+    .select('*');
+
+  if (error) {
+    console.error("Error updating unit:", error);
+    return error;
+  }
+  return data;
+}
