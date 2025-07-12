@@ -177,25 +177,7 @@ const Properties = () => {
     setUnits(prev => [...prev, formattedUnit]);
   };
 
-  const handleEditUnit = (unitId: string, unitData: any) => {
-    
-    
-    
-    setUnits(prev => prev.map(unit =>
-      unit.id === unitId
-        ? {
-          ...unit,
-          unitNumber: (updatedUnit as any).unit,
-          bedrooms: (updatedUnit as any).numberOfbedRooms,
-          bathrooms: (updatedUnit as any).numberOfBath,
-          squareFeet: (updatedUnit as any).squareFeet,
-          monthlyRent: (updatedUnit as any).monthly_rent,
-          status: (updatedUnit as any).status,
-          images: (updatedUnit as any).unitImages
-        }
-        : unit
-    ));
-  };
+
 
   const handleCloseForm = () => {
     setIsFormOpen(false);
