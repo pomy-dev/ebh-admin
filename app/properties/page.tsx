@@ -178,6 +178,9 @@ const Properties = () => {
   };
 
   const handleEditUnit = (unitId: string, unitData: any) => {
+    
+    
+    
     setUnits(prev => prev.map(unit =>
       unit.id === unitId
         ? {
