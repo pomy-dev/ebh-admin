@@ -6,7 +6,7 @@ import PropertyForm from '@/components/properties/PropertyForm';
 import UnitsModal from '@/components/properties/UnitsModal';
 import { Property, Unit } from '@/types';
 import { insertUnit } from '@/services/supabaseService';
-import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId, updateUnit } from '@/services/supabaseService';
+import { getAllProperties, insertProperty, deleteProperty, getUnitsByPropertyId, updateUnit, updateProperty } from '@/services/supabaseService';
 
 const Properties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -50,11 +50,26 @@ const Properties = () => {
     setProperties(prev => [...prev, formarttedProperty]);
   };
 
-  const handleEditProperty = (formData: any) => {
+  const handleEditProperty = async (formData: any) => {
     if (editingProperty) {
+ 
+      const newProperty = await updateProperty(editingProperty.id, {
+        updated_at: new Date().toISOString(),
+        property_name: formData.name,
+        property_type: formData.propertyType,
+        street_address: formData.address,
+        city: formData.city,
+        states: formData.state,
+        zip_code: formData.zipCode,
+        amenities: formData.amenities || [],
+        rules: formData.rules || [],
+        property_image: formData.imageUrl || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJUV3wqQOzLU4NwuFxKS12YFxsJcP5W61KOQ&s'
+      });
+
+
       const updatedProperty: Property = {
         ...editingProperty,
-        name: formData.name,
+        name:` ${formData.name}, ${formData.propertyType}`,
         amenities: formData.amenities || [],
         address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
         imageUrl: formData.imageUrl || editingProperty.imageUrl

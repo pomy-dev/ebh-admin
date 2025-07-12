@@ -30,12 +30,14 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
     city: property?.address?.split(',')[1]?.trim() || '',
     state: property?.address?.split(',')[2]?.trim()?.split(' ')[0] || '',
     zipCode: property?.address?.split(',')[2]?.trim()?.split(' ')[1] || '',
-    propertyType: 'apartment',
-    rules: [],
-    amenities: [],
+    propertyType:  property?.name?.split(',')[1]||'Apartment',
+    rules: property?.rules || [],
+    amenities: property?.amenities || [],
     imageUrl: property?.imageUrl || ''
   });
+
   const [errors, setErrors] = useState<Partial<Record<keyof PropertyFormData, string>>>({});
+
   const propertyTypes = [
     { value: 'Apartment', label: 'Apartment Complex' },
     { value: 'Condo', label: 'Condominium' },
@@ -56,14 +58,14 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
       const stateZip = addressParts[2]?.trim().split(' ') || [];
 
       setFormData({
-        name: property.name,
+        name:  property?.name?.split(',')[0],
         address: addressParts[0] || '',
         city: addressParts[1]?.trim() || '',
         state: stateZip[0] || '',
-        zipCode: stateZip[1] || '',
-        propertyType: 'apartment',
+        zipCode: property?.address?.split(',')[3]?.trim() || '',
+        propertyType: property?.name?.split(',')[1]|| 'Condo',
         rules: property.rules || [],
-        amenities: [],
+        amenities: property.amenities,
         imageUrl: property.imageUrl
       });
     } else if (!property && isOpen) {
@@ -73,7 +75,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
         city: '',
         state: '',
         zipCode: '',
-        propertyType: 'apartment',
+        propertyType: 'Apartment',
         rules: [],
         amenities: [],
         imageUrl: ''
@@ -196,6 +198,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
+                  
                   {propertyTypes.map(type => (
                     <option key={type.value} value={type.value}>
                       {type.label}

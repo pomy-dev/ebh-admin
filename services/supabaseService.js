@@ -3,7 +3,11 @@ import { uploadFileToStorage } from "@/utils/uploads";
 
 // CRUD operations for properties
 export async function insertProperty(data) {
-  const response = await supabase.from("properties").insert([data]).select('*').single();
+  const response = await supabase
+    .from("properties")
+    .insert([data])
+    .select("*")
+    .single();
   if (response.error) {
     console.error("Error inserting property:", response.error);
     return response.error;
@@ -36,7 +40,8 @@ export async function updateProperty(id, updates) {
   const { data, error } = await supabase
     .from("properties")
     .update(updates)
-    .eq("id", id);
+    .eq("id", id)
+    .single();
   if (error) {
     console.error("Error updating property:", error);
     return error;
@@ -55,11 +60,11 @@ export async function deleteProperty(id) {
 
 // CRUD operations for units
 export async function insertUnit(units) {
-  console.log('Inserting unit:', units);
+  console.log("Inserting unit:", units);
   const images = units.images || [];
   const unitImages = await Promise.all(
     images.map(async (image) => {
-      const imgPublicUrl = await uploadFileToStorage('apartments', image);
+      const imgPublicUrl = await uploadFileToStorage("apartments", image);
       if (!imgPublicUrl) {
         console.error("Failed to upload image");
         return null;
@@ -68,18 +73,21 @@ export async function insertUnit(units) {
     })
   );
 
-  const response = await supabase.from("property_apartments")
-    .insert([{
-      unit: units.unitNumber,
-      property_id: units.propertyId,
-      status: units.status,
-      numberOfbedRooms: units.bedrooms,
-      numberOfBath: units.bathrooms,
-      monthly_rent: units.monthlyRent,
-      squareFeet: units.squareFeet,
-      unitImages: unitImages.filter(url => url !== null),
-    }])
-    .select('*')
+  const response = await supabase
+    .from("property_apartments")
+    .insert([
+      {
+        unit: units.unitNumber,
+        property_id: units.propertyId,
+        status: units.status,
+        numberOfbedRooms: units.bedrooms,
+        numberOfBath: units.bathrooms,
+        monthly_rent: units.monthlyRent,
+        squareFeet: units.squareFeet,
+        unitImages: unitImages.filter((url) => url !== null),
+      },
+    ])
+    .select("*")
     .single();
 
   if (response.error) {
@@ -93,13 +101,15 @@ export async function insertUnit(units) {
 export async function getUnitsByPropertyId(id) {
   const { data, error } = await supabase
     .from("property_apartments")
-    .select("*, properties(property_name, street_address, city, states, zip_code, amenities, rules)")
+    .select(
+      "*, properties(property_name, street_address, city, states, zip_code, amenities, rules)"
+    )
     .eq("property_id", id);
   if (error) {
     console.error("Error fetching units:", error);
     return error;
   }
-  console.log('Data from getUnitsByPropertyId:', data);
+  console.log("Data from getUnitsByPropertyId:", data);
   return data;
 }
 
