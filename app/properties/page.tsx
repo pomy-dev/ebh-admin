@@ -52,8 +52,9 @@ const Properties = () => {
 
   const handleEditProperty = async (formData: any) => {
     if (editingProperty) {
-      console.log(editingProperty)
+ 
       const newProperty = await updateProperty(editingProperty.id, {
+        updated_at: new Date().toISOString(),
         property_name: formData.name,
         property_type: formData.propertyType,
         street_address: formData.address,
@@ -68,7 +69,7 @@ const Properties = () => {
 
       const updatedProperty: Property = {
         ...editingProperty,
-        name: formData.name,
+        name:` ${formData.name}, ${formData.propertyType}`,
         amenities: formData.amenities || [],
         address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
         imageUrl: formData.imageUrl || editingProperty.imageUrl
