@@ -9,6 +9,7 @@ export interface Property {
   rules?: string[];
   amenities: string[];
   imageUrl: string;
+  imageFile?: File | null;
 }
 
 export interface Unit {

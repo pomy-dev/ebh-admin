@@ -398,25 +398,31 @@ const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = ({
 
           {activeTab === 'references' && (
             <div className="space-y-4">
-              {application.references.map((reference, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <p className="font-medium text-lg text-gray-400">{reference.name}</p>
-                      <p className="text-gray-600">{reference.relationship}</p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center space-x-2">
-                        {reference.contact.includes('@') ?
-                          <Mail className="w-4 h-4 text-gray-400" /> :
-                          <Phone className="w-4 h-4 text-gray-400" />
-                        }
-                        <span className="text-gray-400">{reference.contact}</span>
+              {Array.isArray(application.references) && application.references.length > 0 ? (
+                application.references.map((reference, index) => (
+                  <div key={index} className="bg-gray-50 rounded-lg p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <p className="font-medium text-lg text-gray-400">{reference.name}</p>
+                        <p className="text-gray-600">{reference.relationship}</p>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center space-x-2">
+                          {reference.contact.includes('@') ? (
+                            <Mail className="w-4 h-4 text-gray-400" />
+                          ) : (
+                            <Phone className="w-4 h-4 text-gray-400" />
+                          )}
+                          <span className="text-gray-400">{reference.contact}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No references provided.</p>
+              )}
+
             </div>
           )}
 
@@ -434,7 +440,7 @@ const ApplicationDetailsModal: React.FC<ApplicationDetailsModalProps> = ({
                       </p>
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => handleViewDocument(document)}
                     className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >

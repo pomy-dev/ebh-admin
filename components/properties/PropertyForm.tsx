@@ -13,7 +13,8 @@ interface PropertyFormData {
   propertyType: string;
   amenities: string[];
   rules: string[];
-  imageUrl: string;
+  imageLocal?: File | null;
+  imageFile?: File | null;
 }
 
 interface PropertyFormProps {
@@ -30,11 +31,12 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
     city: property?.address?.split(',')[1]?.trim() || '',
     state: property?.address?.split(',')[2]?.trim()?.split(' ')[0] || '',
     zipCode: property?.address?.split(',')[2]?.trim()?.split(' ')[1] || '',
-    propertyType:  property?.name?.split(',')[1]||'Apartment',
+    propertyType: property?.name?.split(',')[1] || 'Apartment',
     rules: property?.rules || [],
     amenities: property?.amenities || [],
-    imageUrl: property?.imageUrl || ''
+    imageLocal: null,
   });
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   const [errors, setErrors] = useState<Partial<Record<keyof PropertyFormData, string>>>({});
 
@@ -53,20 +55,39 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
   const [newRule, setNewRule] = useState('');
 
   React.useEffect(() => {
+    if (formData.imageLocal instanceof File) {
+      const objectUrl = URL.createObjectURL(formData.imageLocal);
+      setPreviewImageUrl(objectUrl);
+
+      return () => {
+        URL.revokeObjectURL(objectUrl); // cleanup memory
+      };
+    } else if (property?.imageFile && typeof property.imageFile === 'string') {
+  setPreviewImageUrl(property.imageFile);
+} else {
+      setPreviewImageUrl(null);
+    }
+  }, [formData.imageLocal, property?.imageFile]);
+
+
+
+
+  React.useEffect(() => {
     if (property && isOpen) {
       const addressParts = property.address.split(',');
       const stateZip = addressParts[2]?.trim().split(' ') || [];
 
       setFormData({
-        name:  property?.name?.split(',')[0],
+        name: property?.name?.split(',')[0],
         address: addressParts[0] || '',
         city: addressParts[1]?.trim() || '',
         state: stateZip[0] || '',
         zipCode: property?.address?.split(',')[3]?.trim() || '',
-        propertyType: property?.name?.split(',')[1]|| 'Condo',
+        propertyType: property?.name?.split(',')[1] || 'Condo',
         rules: property.rules || [],
         amenities: property.amenities,
-        imageUrl: property.imageUrl
+        imageLocal: null,
+        imageFile: property.imageFile,
       });
     } else if (!property && isOpen) {
       setFormData({
@@ -78,7 +99,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
         propertyType: 'Apartment',
         rules: [],
         amenities: [],
-        imageUrl: ''
+        imageLocal: null
       });
     }
     setErrors({});
@@ -198,7 +219,7 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 placeholder-gray-400 placeholder-opacity-50 text-gray-800 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  
+
                   {propertyTypes.map(type => (
                     <option key={type.value} value={type.value}>
                       {type.label}
@@ -356,29 +377,31 @@ const PropertyForm: React.FC<PropertyFormProps> = ({ isOpen, onClose, onSubmit, 
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                      setFormData(prev => ({
-                        ...prev,
-                        imageUrl: reader.result as string, // base64 image preview
-                      }));
-                    };
-                    reader.readAsDataURL(file);
+                  if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    setFormData(prev => ({
+                      ...prev,
+                      imageFile: file,
+                      imageLocal: file
+                    }));
+
                   }
+
                 }}
                 className="w-full text-gray-400 placeholder-gray-300 px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-all"
               />
-              {formData.imageUrl ? (
+              {previewImageUrl ? (
                 <img
-                  src={formData.imageUrl}
-                  alt="Preview"
+                  src={previewImageUrl}
+                  alt="Property Preview"
                   className="w-[200px] h-[200px] object-cover rounded mt-2"
                 />
-              ) : (<p className="text-sm text-gray-500 mt-1">
-                Provide a URL to an image of the property. If left empty, a default image will be used.
-              </p>)}
+              ) : (
+                <p className="text-sm text-gray-500 mt-1">
+                  Provide a property image. If left empty, a default image will be used.
+                </p>
+              )}
+
             </div>
           </div>
 

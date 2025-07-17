@@ -6,14 +6,12 @@ import {
   Filter, 
   Download, 
   FileText, 
-  FileSpreadsheet, 
-  FileX, 
+ 
   User, 
   Phone, 
   Mail, 
   MapPin, 
-  Calendar, 
-  DollarSign, 
+
   Eye,
   Clock,
   CheckCircle,
