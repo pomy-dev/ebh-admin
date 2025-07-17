@@ -22,17 +22,7 @@ const Properties = () => {
   }, [])
 
   const handleAddProperty = async (formData: any) => {
-    const newProperty = await insertProperty({
-      property_name: formData.name,
-      property_type: formData.propertyType,
-      street_address: formData.address,
-      city: formData.city,
-      states: formData.state,
-      zip_code: formData.zipCode,
-      amenities: formData.amenities || [],
-      rules: formData.rules || [],
-      property_image: formData.imageUrl || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJUV3wqQOzLU4NwuFxKS12YFxsJcP5W61KOQ&s'
-    });
+    const newProperty = await insertProperty(formData);
 
     const formarttedProperty = {
       id: newProperty.id,
@@ -43,7 +33,8 @@ const Properties = () => {
       available: 0,
       maintenance: 0,
       amenities: newProperty.amenities || [],
-      imageUrl: newProperty.property_image || 'https://www.pngkey.com/png/detail/266-2665301_jpg-freeuse-library-apartment-for-rent-clipart-house.png'
+      imageUrl: newProperty.property_image || 'https://www.pngkey.com/png/detail/266-2665301_jpg-freeuse-library-apartment-for-rent-clipart-house.png',
+      imageFile: newProperty.property_image,
     }
 
     console.log(formarttedProperty)
@@ -53,18 +44,7 @@ const Properties = () => {
   const handleEditProperty = async (formData: any) => {
     if (editingProperty) {
  
-      const newProperty = await updateProperty(editingProperty.id, {
-        updated_at: new Date().toISOString(),
-        property_name: formData.name,
-        property_type: formData.propertyType,
-        street_address: formData.address,
-        city: formData.city,
-        states: formData.state,
-        zip_code: formData.zipCode,
-        amenities: formData.amenities || [],
-        rules: formData.rules || [],
-        property_image: formData.imageUrl || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSJUV3wqQOzLU4NwuFxKS12YFxsJcP5W61KOQ&s'
-      });
+      const newProperty = await updateProperty(editingProperty.id, formData);
 
 
       const updatedProperty: Property = {
@@ -72,7 +52,8 @@ const Properties = () => {
         name:` ${formData.name}, ${formData.propertyType}`,
         amenities: formData.amenities || [],
         address: `${formData.address}, ${formData.city}, ${formData.state} ${formData.zipCode}`,
-        imageUrl: formData.imageUrl || editingProperty.imageUrl
+        imageUrl: '',
+        imageFile: formData.imageFile,
       };
 
       setProperties(prev => prev.map(property =>
@@ -98,7 +79,7 @@ const Properties = () => {
 
   const handleDeletePropertyClick = async (property: Property) => {
     alert('Are you sure you want to delete this property? This action cannot be undone.');
-    let error = await deleteProperty(property.id);
+    const error = await deleteProperty(property.id);
     if (error) {
       alert(`Error deleting property: ${error}`);
     }
@@ -296,7 +277,8 @@ const Properties = () => {
           maintenance: onMaintenanceUnits, // Assuming maintenance is a field in the property
           amenities: property.amenities || [],
           rules: property.rules || [],
-          imageUrl: property.property_image || 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg'
+          imageUrl: property.property_image || 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg',
+          imageFile : property.property_image,
         };
 
         setProperties(prev => {

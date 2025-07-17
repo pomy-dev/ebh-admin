@@ -3,9 +3,35 @@ import { uploadFileToStorage } from "@/utils/uploads";
 
 // CRUD operations for properties
 export async function insertProperty(data) {
+ const images = data.imageFile || null;
+  const proImages = async () => {
+    const imgPublicUrl = await uploadFileToStorage("property", images);
+    if (!imgPublicUrl) {
+      console.error("Failed to upload image");
+      return null;
+    }
+    return imgPublicUrl;
+  };
+
+  // Wait for the image upload to complete
+  const imageUrl = await proImages();
+ 
+
   const response = await supabase
     .from("properties")
-    .insert([data])
+    .insert([
+      {
+        property_name: data.name,
+        property_type: data.propertyType,
+        street_address: data.address,
+        city: data.city,
+        states: data.state,
+        zip_code: data.zipCode,
+        amenities: data.amenities || [],
+        rules: data.rules || [],
+        property_image: imageUrl,
+      },
+    ])
     .select("*")
     .single();
   if (response.error) {
@@ -37,9 +63,33 @@ export async function getPropertyById(id) {
 }
 
 export async function updateProperty(id, updates) {
+  const images = updates.imageFile || null;
+  const proImages = async () => {
+    const imgPublicUrl = await uploadFileToStorage("property", images);
+    if (!imgPublicUrl) {
+      console.error("Failed to upload image");
+      return null;
+    }
+    return imgPublicUrl;
+  };
+
+  // Wait for the image upload to complete
+  const imageUrl = await proImages();
+  
+
   const { data, error } = await supabase
     .from("properties")
-    .update(updates)
+    .update({
+      property_name: updates.name,
+      property_type: updates.propertyType,
+      street_address: updates.address,
+      city: updates.city,
+      states: updates.state,
+      zip_code: updates.zipCode,
+      amenities: updates.amenities || [],
+      rules: updates.rules || [],
+      property_image: imageUrl,
+    })
     .eq("id", id)
     .single();
   if (error) {
@@ -118,10 +168,10 @@ export async function updateUnit(id, updates) {
   const unitImages = await Promise.all(
     images.map(async (image) => {
       // Check if the image is a URL or a file object
-      if (typeof image === 'string' && image.startsWith('https://')) {
+      if (typeof image === "string" && image.startsWith("https://")) {
         return image; // If it's already a URL, return it directly
       } else {
-        return await uploadFileToStorage('apartments', image);
+        return await uploadFileToStorage("apartments", image);
       } // Return the public URL of the uploaded image
     })
   );
@@ -135,10 +185,12 @@ export async function updateUnit(id, updates) {
       numberOfBath: updates.numberOfBath,
       monthly_rent: updates.monthly_rent,
       squareFeet: updates.squareFeet,
-      unitImages: unitImages.filter(url => url !== null),
-      updated_at: new Date().toISOString()
-    }).eq("id", id)
-    .select().single();
+      unitImages: unitImages.filter((url) => url !== null),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select()
+    .single();
 
   if (error) {
     console.error("Error updating unit:", error);

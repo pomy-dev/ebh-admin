@@ -45,13 +45,45 @@ const PropertyList: React.FC<PropertyListProps> = ({ properties, onViewUnits, on
                       <Edit className="w-4 h-4 text-gray-600 hover:text-blue-600" />
                     </button>
                   </div>
-                  <Image
-                    src={property.imageUrl}
+                  {property.imageFile instanceof File ? (
+                    <img
+                      src={URL.createObjectURL(property.imageFile)}
+                      alt={property.name}
+                      width={400}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : property.imageFile ? (
+                    <img
+                      src={property.imageFile}
+                      alt={property.name}
+                      width={400}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : property.imageUrl ? (
+                    <img
+                      src={property.imageUrl}
+                      alt={property.name}
+                      width={400}
+                      height={200}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400">
+                      No Image
+                    </div>
+                  )}
+
+
+
+                  {/* <img
+                    src={URL.createObjectURL(property.imageFile)}
                     alt={property.name}
                     width={400}
                     height={200}
                     className="w-full h-48 object-cover"
-                  />
+                  /> */}
                   <div className="p-6">
                     <h3 className="text-xl font-semibold text-gray-800">{property.name}</h3>
                     <p className="text-gray-600 mt-2">{property.address}</p>

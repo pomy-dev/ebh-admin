@@ -15,7 +15,7 @@ import {
   Loader2,
   Trash2,
 } from "lucide-react";
-import { getUserDetail } from '@/services/tenantsService';
+import { getUserDetail } from "@/services/tenantsService";
 
 const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
   const [filters, setFilters] = useState({
@@ -77,14 +77,15 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
     return tenants.filter((tenant) => {
       const matchesProperty =
         !filters.property || tenant.propertyName === filters.property;
-      const matchesStatus =
-        !filters.status || tenant.status === filters.status;
+      const matchesStatus = !filters.status || tenant.status === filters.status;
 
       const userDetail = userDetailsMap[tenant.user_id];
       const matchesSearch =
         !filters.search ||
         tenant.unit?.toLowerCase().includes(filters.search.toLowerCase()) ||
-        userDetail?.name?.toLowerCase().includes(filters.search.toLowerCase()) ||
+        userDetail?.name
+          ?.toLowerCase()
+          .includes(filters.search.toLowerCase()) ||
         userDetail?.email?.toLowerCase().includes(filters.search.toLowerCase());
 
       return matchesProperty && matchesStatus && matchesSearch;
@@ -123,21 +124,27 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
             {showExportMenu && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
                 <button
-                  onClick={() => {/* implement exportToCSV */ }}
+                  onClick={() => {
+                    /* implement exportToCSV */
+                  }}
                   className="w-full flex items-center space-x-2 px-4 py-3 text-left hover:bg-gray-50"
                 >
                   <FileText className="w-4 h-4 text-green-600" />
                   <span>Export as CSV</span>
                 </button>
                 <button
-                  onClick={() => {/* implement exportToExcel */ }}
+                  onClick={() => {
+                    /* implement exportToExcel */
+                  }}
                   className="w-full flex items-center space-x-2 px-4 py-3 text-left hover:bg-gray-50"
                 >
                   <FileSpreadsheet className="w-4 h-4 text-green-600" />
                   <span>Export as Excel</span>
                 </button>
                 <button
-                  onClick={() => {/* implement exportToWord */ }}
+                  onClick={() => {
+                    /* implement exportToWord */
+                  }}
                   className="w-full flex items-center space-x-2 px-4 py-3 text-left hover:bg-gray-50"
                 >
                   <FileX className="w-4 h-4 text-blue-600" />
@@ -165,7 +172,9 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
             >
               <option value="">All Properties</option>
               {uniqueProperties.map((p, idx) => (
-                <option key={idx} value={p}>{p}</option>
+                <option key={idx} value={p}>
+                  {p}
+                </option>
               ))}
             </select>
             <select
@@ -195,6 +204,7 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
           <span>Loading tenant data...</span>
         </div>
       ) : (
+        <div>
         <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredTenants.map((t) => {
             const user = userDetailsMap[t.user_id] || {};
@@ -297,19 +307,20 @@ const TenantsList = ({ tenants, onEditTenant, onDeleteTenant }) => {
             );
           })}
         </div>
-      )}
 
-      {filteredTenants.length === 0 && (
-        <div className="text-center py-12">
-          <div className="p-4 bg-gray-100 rounded-lg inline-block mb-4">
-            <User className="w-8 h-8 text-gray-400" />
-          </div>
-          <p className="text-gray-500">
-            No tenants found matching your filters.
-          </p>
+          {filteredTenants.length === 0 && (
+            <div className="text-center py-12">
+              <div className="p-4 bg-gray-100 rounded-lg inline-block mb-4">
+                <User className="w-8 h-8 text-gray-400" />
+              </div>
+              <p className="text-gray-500">
+                No tenants found matching your filters.
+              </p>
+            </div>
+          )}
+      
         </div>
       )}
-
     </div>
   );
 };

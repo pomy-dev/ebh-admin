@@ -1,98 +1,113 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ApplicationsList from '../../components/applications/ApplicationsList';
 import ApplicationDetailsModal from '../../components/applications/ApplicationDetailsModal';
 import { applications } from '../../utils/mockData';
 import { RentalApplication } from '../../types';
+import { fetchApplicationsWithProperties, makeDecition } from '../../services/supabaseApartmentService';
 
 const Applications = () => {
   const [applicationsData, setApplicationsData] = useState(applications);
   const [selectedApplication, setSelectedApplication] = useState<RentalApplication | null>(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
+  useEffect(() => {
+    const fetchApartments = async () => {
+      try {
+        const apps = await fetchApplicationsWithProperties();
+        setApplicationsData(apps);
+      } catch (err) {
+        console.error('Failed to fetch applications:', err);
+      }
+    };
+
+    fetchApartments();
+  }, []);
+
+
+
   const handleViewApplication = (application: RentalApplication) => {
     setSelectedApplication(application);
     setIsDetailsModalOpen(true);
   };
 
-  const handleApplicationDecision = (applicationId: string, decision: 'approved' | 'rejected', notes: string, conditions?: string[]) => {
-    setApplicationsData(prev => prev.map(app => {
-      // If approving this application, reject all others for the same unit
-      if (decision === 'approved' && app.id === applicationId) {
-        return {
-          ...app,
-          status: decision,
-          review: {
-            reviewedBy: 'Property Manager',
-            reviewedAt: new Date().toISOString(),
-            decision,
-            notes,
-            conditions
-          }
-        };
-      }
 
-      // Auto-reject other applications for the same unit when one is approved
-      const approvedApp = prev.find(a => a.id === applicationId);
-      if (decision === 'approved' &&
-        approvedApp &&
-        app.propertyId === approvedApp.propertyId &&
-        app.unitNumber === approvedApp.unitNumber &&
-        app.id !== applicationId &&
-        app.status !== 'rejected') {
-        return {
-          ...app,
-          status: 'rejected',
-          review: {
-            reviewedBy: 'System Auto-Rejection',
-            reviewedAt: new Date().toISOString(),
-            decision: 'rejected',
-            notes: `Automatically rejected - Unit ${approvedApp.unitNumber} was awarded to another applicant.`,
-          }
-        };
-      }
 
-      // Handle direct rejection or other status updates
-      if (app.id === applicationId && decision === 'rejected') {
-        return {
-          ...app,
-          status: decision,
-          review: {
-            reviewedBy: 'Property Manager',
-            reviewedAt: new Date().toISOString(),
-            decision,
-            notes,
-            conditions
-          }
-        };
-      }
-
-      return app;
+  const handleApplicationDecision = async (
+    applicationId: string,
+    decision: "approved" | "rejected" | "pending" | "under-review",
+    notes: string,
+    conditions?: string[]
+  ) => {
+    // 1. Make decision in Supabase
+    const { data, error } = await makeDecition(applicationId, decision, conditions);
+    if (error) {
+      console.error("Failed to update decision:", error.message);
+      return;
     }
-    ));
 
-    // Show notification for auto-rejections
-    if (decision === 'approved') {
-      const approvedApp = applicationsData.find(app => app.id === applicationId);
-      const autoRejectedCount = applicationsData.filter(app =>
-        app.propertyId === approvedApp?.propertyId &&
-        app.unitNumber === approvedApp?.unitNumber &&
-        app.id !== applicationId &&
-        app.status !== 'rejected'
-      ).length;
+    // 2. Update frontend state
+    setApplicationsData(prev => {
+      const updatedApp = prev.find(app => app.id === applicationId);
+      const propertyId = updatedApp?.propertyId;
+      const unitNumber = updatedApp?.unitNumber;
 
-      if (autoRejectedCount > 0) {
-        // In a real app, you'd show a toast notification here
-        console.log(`${autoRejectedCount} other application(s) automatically rejected for this unit.`);
-      }
-    }
+      return prev.map(app => {
+        // Approve the selected application
+        if (app.id === applicationId) {
+          return {
+            ...app,
+            status: decision,
+            review: {
+              reviewedBy: 'Property Manager',
+              reviewedAt: new Date().toISOString(),
+              decision,
+              notes,
+              conditions
+            }
+          };
+        }
+
+        // Auto-reject other applications for the same unit
+        if (
+          decision === 'approved' &&
+          app.id !== applicationId &&
+          app.propertyId === propertyId &&
+          app.unitNumber === unitNumber &&
+          app.status !== 'rejected'
+        ) {
+          return {
+            ...app,
+            status: 'rejected',
+            review: {
+              reviewedBy: 'System Auto-Rejection',
+              reviewedAt: new Date().toISOString(),
+              decision: 'rejected',
+              notes: `Automatically rejected - Unit ${unitNumber} was awarded to another applicant.`
+            }
+          };
+        }
+
+        // For rejection, only update the one rejected
+        return app;
+      });
+    });
+
   };
+
 
   const handleStatusUpdate = (applicationId: string, status: RentalApplication['status']) => {
     setApplicationsData(prev => prev.map(app =>
       app.id === applicationId ? { ...app, status } : app
     ));
+    handleApplicationDecision(
+      applicationId,
+      status,
+      '',
+      []
+    );
+
   };
 
   return (
